@@ -14,7 +14,6 @@ himmelblau_packages:
   - nss-himmelblau
   - authselect
   - pam
-  - pam-pkcs11
 
 # Microsoft Entra ID Tenant Settings
 himmelblau_domain: "example.com"
