@@ -50,7 +50,8 @@ if [ -f "$BIOS_GRUB" ]; then
     echo "Configuring BIOS GRUB menu..."
     sed -i 's/set default="1"/set default="0"/' "$BIOS_GRUB"
     sed -i 's/set timeout=60/set timeout=5/' "$BIOS_GRUB"
-    sed -i 's|linux /images/pxeboot/vmlinuz inst.stage2|linux /images/pxeboot/vmlinuz inst.ks=cdrom:/ks.cfg inst.stage2|g' "$BIOS_GRUB"
+    sed -i 's/menuentry '\''Install AlmaLinux 10/menuentry '\''Install AlmaLinux 10 Workstation (Automated CIS Hardened)/' "$BIOS_GRUB"
+    sed -i 's|linux /images/pxeboot/vmlinuz inst.stage2|linux /images/pxeboot/vmlinuz inst.ks=cdrom:/ks.cfg inst.stage2 quiet|g' "$BIOS_GRUB"
 fi
 
 # Modify EFI GRUB config
@@ -58,7 +59,8 @@ if [ -f "$EFI_GRUB" ]; then
     echo "Configuring EFI GRUB menu..."
     sed -i 's/set default="1"/set default="0"/' "$EFI_GRUB"
     sed -i 's/set timeout=60/set timeout=5/' "$EFI_GRUB"
-    sed -i 's|linuxefi /images/pxeboot/vmlinuz inst.stage2|linuxefi /images/pxeboot/vmlinuz inst.ks=cdrom:/ks.cfg inst.stage2|g' "$EFI_GRUB"
+    sed -i 's/menuentry '\''Install AlmaLinux 10/menuentry '\''Install AlmaLinux 10 Workstation (Automated CIS Hardened)/' "$EFI_GRUB"
+    sed -i 's|linuxefi /images/pxeboot/vmlinuz inst.stage2|linuxefi /images/pxeboot/vmlinuz inst.ks=cdrom:/ks.cfg inst.stage2 quiet|g' "$EFI_GRUB"
 fi
 
 # Remove existing output file if present to avoid xorriso media conflict

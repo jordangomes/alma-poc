@@ -1,17 +1,30 @@
 ---
-# Main entrypoint for role himmelblau_auth
+# Main entrypoint for role himmelblau_auth with graceful failure handling
 
-- name: Configure Himmelblau RPM repository
-  ansible.builtin.include_tasks: repo.yml
+- name: Himmelblau Authentication Setup
+  block:
+    - name: Configure Himmelblau RPM repository
+      ansible.builtin.include_tasks: repo.yml
 
-- name: Install Himmelblau packages
-  ansible.builtin.include_tasks: install.yml
+    - name: Install Himmelblau packages
+      ansible.builtin.include_tasks: install.yml
 
-- name: Configure Himmelblau configuration and sudoers
-  ansible.builtin.include_tasks: configure.yml
+    - name: Configure Himmelblau configuration and sudoers
+      ansible.builtin.include_tasks: configure.yml
 
-- name: Configure system authselect profile for Himmelblau
-  ansible.builtin.include_tasks: authselect.yml
+    - name: Configure system authselect profile for Himmelblau
+      ansible.builtin.include_tasks: authselect.yml
 
-- name: Manage Himmelblau services
-  ansible.builtin.include_tasks: service.yml
+    - name: Manage Himmelblau services
+      ansible.builtin.include_tasks: service.yml
+
+  rescue:
+    - name: Report Himmelblau deployment warning
+      ansible.builtin.debug:
+        msg:
+          - "===================================================================="
+          - " [WARNING] Himmelblau Entra ID configuration could not be completed."
+          - " Possible cause: External repository unreachable or offline install."
+          - " SSSD / Local administrator access remains fully functional."
+          - " System will re-attempt automatically via ansible-pull.timer."
+          - "===================================================================="
