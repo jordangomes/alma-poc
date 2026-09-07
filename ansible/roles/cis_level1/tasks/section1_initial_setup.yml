@@ -10,7 +10,7 @@
     mode: '0644'
 
 - name: Configure nodev, nosuid, noexec mount options for /tmp
-  ansible.posix.mount:
+  ansible.builtin.mount:
     path: /tmp
     state: mounted
     fstype: tmpfs
@@ -19,7 +19,7 @@
   failed_when: false
 
 - name: Configure nodev, nosuid, noexec mount options for /dev/shm
-  ansible.posix.mount:
+  ansible.builtin.mount:
     path: /dev/shm
     state: mounted
     fstype: tmpfs
