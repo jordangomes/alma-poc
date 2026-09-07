@@ -1,14 +1,22 @@
 ---
 # Manage Himmelblau systemd services
 
-- name: Ensure himmelblaud service is enabled and started
+- name: Ensure himmelblaud daemon is enabled and started
   ansible.builtin.systemd:
     name: himmelblaud
     state: started
     enabled: true
+  ignore_errors: true
 
-- name: Ensure himmelblaud-tasks service is enabled and started
+- name: Check if himmelblaud-tasks unit exists
+  ansible.builtin.stat:
+    path: /usr/lib/systemd/system/himmelblaud-tasks.service
+  register: himmelblaud_tasks_unit
+
+- name: Ensure himmelblaud-tasks service is enabled and started if present
   ansible.builtin.systemd:
     name: himmelblaud-tasks
     state: started
     enabled: true
+  when: himmelblaud_tasks_unit.stat.exists
+  ignore_errors: true

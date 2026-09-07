@@ -20,8 +20,7 @@ systemctl status ansible-pull.service --no-pager || echo "ansible-pull.service: 
 
 echo ""
 echo "--- [2/4] Checking Himmelblau Authentication & Daemons ---"
-systemctl status himmelblaud --no-pager || echo "himmelblaud: Not running"
-systemctl status himmelblaud-tasks --no-pager || echo "himmelblaud-tasks: Not running"
+systemctl is-active himmelblaud >/dev/null 2>&1 && systemctl status himmelblaud --no-pager || echo "himmelblaud: Inactive / Not running"
 if command -v authselect &>/dev/null; then
     echo "Current Authselect Profile:"
     authselect current || true
