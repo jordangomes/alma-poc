@@ -1,13 +1,9 @@
 ---
-# Microsoft Entra ID (Azure AD) and Himmelblau configuration variables
-
-# Official Himmelblau repository for Enterprise Linux 10
 himmelblau_repo_baseurl: "https://packages.himmelblau-idm.org/stable/latest/rpm/rocky10"
 himmelblau_repo_gpgkey: "https://packages.himmelblau-idm.org/himmelblau.asc"
 himmelblau_repo_enabled: true
 himmelblau_repo_gpgcheck: true
 
-# Himmelblau packages
 himmelblau_packages:
   - himmelblau
   - pam-himmelblau
@@ -15,28 +11,18 @@ himmelblau_packages:
   - authselect
   - pam
 
-# Microsoft Entra ID Tenant Settings
 himmelblau_domain: "jordangomes.com"
-himmelblau_tenant_id: "fd66b8c6-bb52-4064-af3b-adbf03e86645"
-himmelblau_app_id: "4942b72d-1d20-4dea-ac8d-3504fe3547e4" # Optional specific App Registration Client ID
+himmelblau_idmap_range: "200000-2000200000"
+himmelblau_app_id: "4942b72d-1d20-4dea-ac8d-3504fe3547e4"
+himmelblau_debug: false
+himmelblau_pam_allow_groups: []
 
-# Authentication and PAM settings
-himmelblau_offline_cache: true
-himmelblau_homedir_template: "/home/%u@%d"
-himmelblau_default_shell: "/bin/bash"
-himmelblau_require_mfa: true
-himmelblau_enable_gdm: true
-
-# Authselect profile options
-# e.g., "with-mfa with-silent-lastlog with-sudo with-gdm"
 himmelblau_authselect_features:
   - "with-mfa"
   - "with-silent-lastlog"
   - "with-sudo"
   - "with-gdm"
 
-# Entra ID Security Groups to be granted administrative sudo privileges
-# Example: "%aad_linux_admins ALL=(ALL) ALL" or "%Linux-Admins@yourdomain.com ALL=(ALL) ALL"
 himmelblau_sudo_groups:
   - name: "aad_linux_admins"
     spec: "ALL=(ALL) ALL"
