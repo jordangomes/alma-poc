@@ -1,0 +1,58 @@
+---
+# Section 4: Logging and Auditing
+
+- name: Ensure audit packages are installed
+  ansible.builtin.package:
+    name:
+      - audit
+      - audit-libs
+    state: present
+
+- name: Configure auditd.conf parameters
+  ansible.builtin.lineinfile:
+    path: /etc/audit/auditd.conf
+    regexp: "^{{ item.key }}\\s*="
+    line: "{{ item.key }} = {{ item.value }}"
+    state: present
+  loop:
+    - { key: "max_log_file", value: "{{ cis_auditd_max_log_file }}" }
+    - { key: "max_log_file_action", value: "{{ cis_auditd_max_log_file_action }}" }
+    - { key: "space_left", value: "{{ cis_auditd_space_left }}" }
+    - { key: "space_left_action", value: "{{ cis_auditd_space_left_action }}" }
+    - { key: "admin_space_left", value: "{{ cis_auditd_admin_space_left }}" }
+    - { key: "admin_space_left_action", value: "{{ cis_auditd_admin_space_left_action }}" }
+
+- name: Deploy CIS audit rules
+  ansible.builtin.template:
+    src: audit.rules.j2
+    dest: "{{ cis_auditd_rules_file }}"
+    owner: root
+    group: root
+    mode: '0640'
+  notify: Regenerate auditd rules
+
+- name: Ensure auditd service is enabled and started
+  ansible.builtin.service:
+    name: auditd
+    state: started
+    enabled: true
+
+- name: Ensure systemd-journald directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/journald.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Configure persistent journald logging
+  ansible.builtin.copy:
+    dest: /etc/systemd/journald.conf.d/00-cis-journald.conf
+    content: |
+      [Journal]
+      Storage=persistent
+      Compress=yes
+      ForwardToSyslog=yes
+    owner: root
+    group: root
+    mode: '0644'

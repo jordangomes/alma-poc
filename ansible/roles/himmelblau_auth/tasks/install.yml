@@ -1,0 +1,7 @@
+---
+# Install Himmelblau packages
+
+- name: Install Himmelblau and authentication dependencies
+  ansible.builtin.package:
+    name: "{{ himmelblau_packages }}"
+    state: present

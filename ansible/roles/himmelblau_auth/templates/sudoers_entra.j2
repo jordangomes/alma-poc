@@ -1,0 +1,6 @@
+# Sudoers configuration for Microsoft Entra ID Groups
+# Managed by Ansible
+
+{% for group in himmelblau_sudo_groups %}
+%{{ group.name }} {{ group.spec }}
+{% endfor %}

@@ -1,0 +1,39 @@
+---
+# Tasks for role bootstrap_pull
+
+- name: Ensure target pull directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_pull_dest_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Deploy systemd ansible-pull service unit
+  ansible.builtin.template:
+    src: ansible-pull.service.j2
+    dest: /etc/systemd/system/ansible-pull.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd daemon
+
+- name: Deploy systemd ansible-pull timer unit
+  ansible.builtin.template:
+    src: ansible-pull.timer.j2
+    dest: /etc/systemd/system/ansible-pull.timer
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reload systemd daemon
+    - Restart ansible-pull timer
+
+- name: Flush handlers to apply systemd changes immediately
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure ansible-pull timer is enabled and active
+  ansible.builtin.systemd:
+    name: ansible-pull.timer
+    state: started
+    enabled: true

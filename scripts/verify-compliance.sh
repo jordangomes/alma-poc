@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: verify-compliance.sh
+# Purpose: Comprehensive audit of AlmaLinux 10 build state:
+#          - ansible-pull systemd units
+#          - Himmelblau daemon & authselect status
+#          - OpenSCAP CIS Level 1 Workstation compliance evaluation (generates report.html)
+# ==============================================================================
+
+set -uo pipefail
+
+echo "================================================================================"
+echo "          AlmaLinux 10 Workstation Compliance & State Verification              "
+echo "================================================================================"
+
+echo ""
+echo "--- [1/4] Checking ansible-pull Systemd Units ---"
+systemctl status ansible-pull.timer --no-pager || echo "ansible-pull.timer: Inactive or missing"
+systemctl status ansible-pull.service --no-pager || echo "ansible-pull.service: Not running (oneshot)"
+
+echo ""
+echo "--- [2/4] Checking Himmelblau Authentication & Daemons ---"
+systemctl status himmelblaud --no-pager || echo "himmelblaud: Not running"
+systemctl status himmelblaud-tasks --no-pager || echo "himmelblaud-tasks: Not running"
+if command -v authselect &>/dev/null; then
+    echo "Current Authselect Profile:"
+    authselect current || true
+fi
+
+echo ""
+echo "--- [3/4] Checking Core CIS Hardening Parameters ---"
+echo "Sysctl net.ipv4.ip_forward: $(sysctl -n net.ipv4.ip_forward 2>/dev/null || echo 'N/A')"
+echo "Sysctl kernel.randomize_va_space: $(sysctl -n kernel.randomize_va_space 2>/dev/null || echo 'N/A')"
+echo "Sysctl fs.suid_dumpable: $(sysctl -n fs.suid_dumpable 2>/dev/null || echo 'N/A')"
+if command -v auditctl &>/dev/null; then
+    echo "Audit Rules Count: $(auditctl -l 2>/dev/null | wc -l)"
+fi
+
+echo ""
+echo "--- [4/4] Running OpenSCAP CIS Level 1 Compliance Scan ---"
+DS_SEARCH_PATHS=(
+    "/usr/share/xml/scap/ssg/content/ssg-almalinux10-ds.xml"
+    "/usr/share/xml/scap/ssg/content/ssg-cs10-ds.xml"
+    "/usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml"
+    "/usr/share/xml/scap/ssg/content/ssg-almalinux9-ds.xml"
+)
+
+DS_PATH=""
+for path in "${DS_SEARCH_PATHS[@]}"; do
+    if [ -f "$path" ]; then
+        DS_PATH="$path"
+        break
+    fi
+done
+
+if [ -n "$DS_PATH" ] && command -v oscap &>/dev/null; then
+    REPORT_FILE="/tmp/cis-report.html"
+    RESULTS_FILE="/tmp/cis-results.xml"
+    PROFILE="xccdf_org.ssgproject.content_profile_cis_workstation_l1"
+
+    echo "Running oscap xccdf eval against $DS_PATH..."
+    oscap xccdf eval \
+        --profile "$PROFILE" \
+        --results "$RESULTS_FILE" \
+        --report "$REPORT_FILE" \
+        "$DS_PATH" || true
+
+    echo "OpenSCAP Scan Report generated at: $REPORT_FILE"
+    echo "OpenSCAP Scan Results XML at:      $RESULTS_FILE"
+else
+    echo "WARNING: oscap or SCAP datastream not installed. Skipping OpenSCAP HTML evaluation."
+    echo "Install with: sudo dnf install -y openscap-scanner scap-security-guide"
+fi
+
+echo ""
+echo "================================================================================"
+echo " Verification Complete. Review the results above or check /tmp/cis-report.html "
+echo "================================================================================"

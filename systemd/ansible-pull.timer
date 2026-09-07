@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Ansible Pull periodically and on boot
+Documentation=https://docs.ansible.com/ansible/latest/cli/ansible-pull.html
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=30min
+RandomizedDelaySec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

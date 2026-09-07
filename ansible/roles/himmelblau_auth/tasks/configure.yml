@@ -1,0 +1,29 @@
+---
+# Configure Himmelblau and Sudoers for Entra ID
+
+- name: Ensure Himmelblau configuration directory exists
+  ansible.builtin.file:
+    path: "{{ himmelblau_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+
+- name: Deploy himmelblau.conf
+  ansible.builtin.template:
+    src: himmelblau.conf.j2
+    dest: "{{ himmelblau_config_file }}"
+    owner: root
+    group: root
+    mode: '0600'
+  notify: Restart himmelblau daemons
+
+- name: Deploy sudoers rules for Entra ID administrator groups
+  ansible.builtin.template:
+    src: sudoers_entra.j2
+    dest: "{{ himmelblau_sudoers_file }}"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: 'visudo -cf %s'
+  when: himmelblau_sudo_groups | length > 0

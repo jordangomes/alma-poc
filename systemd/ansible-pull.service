@@ -1,0 +1,21 @@
+[Unit]
+Description=Ansible Pull Configuration Convergence
+Documentation=https://docs.ansible.com/ansible/latest/cli/ansible-pull.html
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/var/lib/ansible/local
+ExecStart=/usr/bin/ansible-pull \
+    -U https://github.com/example-org/alma-poc.git \
+    -C main \
+    -d /var/lib/ansible/local \
+    -i ansible/inventory/hosts.yml \
+    ansible/local.yml
+StandardOutput=journal+console
+StandardError=journal+console
+SuccessExitStatus=0 2
+
+[Install]
+WantedBy=multi-user.target

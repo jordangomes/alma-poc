@@ -1,0 +1,13 @@
+---
+# Configure Himmelblau official RPM repository for Enterprise Linux 10
+
+- name: Deploy Himmelblau yum/dnf repository configuration
+  ansible.builtin.yum_repository:
+    name: himmelblau
+    description: Himmelblau IDM Repository for Enterprise Linux 10
+    baseurl: "{{ himmelblau_repo_baseurl }}"
+    gpgkey: "{{ himmelblau_repo_gpgkey }}"
+    gpgcheck: "{{ himmelblau_repo_gpgcheck }}"
+    enabled: "{{ himmelblau_repo_enabled }}"
+    repo_gpgcheck: false
+    state: present

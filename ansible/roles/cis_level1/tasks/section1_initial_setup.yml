@@ -1,0 +1,102 @@
+---
+# Section 1: Initial Setup
+
+- name: Blacklist unused filesystems and network protocols
+  ansible.builtin.template:
+    src: modprobe_blacklist.conf.j2
+    dest: "{{ cis_modprobe_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Configure nodev, nosuid, noexec mount options for /tmp
+  ansible.posix.mount:
+    path: /tmp
+    state: mounted
+    fstype: tmpfs
+    src: tmpfs
+    opts: "defaults,nodev,nosuid,noexec"
+  failed_when: false
+
+- name: Configure nodev, nosuid, noexec mount options for /dev/shm
+  ansible.posix.mount:
+    path: /dev/shm
+    state: mounted
+    fstype: tmpfs
+    src: tmpfs
+    opts: "defaults,nodev,nosuid,noexec"
+  failed_when: false
+
+- name: Deploy warning banners to /etc/issue and /etc/issue.net
+  ansible.builtin.template:
+    src: issue.j2
+    dest: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - "{{ cis_issue_file }}"
+    - "{{ cis_issue_net_file }}"
+    - "{{ cis_motd_file }}"
+
+- name: Ensure GDM dconf directory exists
+  ansible.builtin.file:
+    path: /etc/dconf/db/gdm.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: system_profile == 'workstation'
+
+- name: Configure GDM login screen banner
+  ansible.builtin.template:
+    src: gdm_banner.j2
+    dest: "{{ cis_gdm_banner_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+  when: system_profile == 'workstation'
+  notify: Update dconf databases
+
+- name: Ensure GDM profile is configured in dconf
+  ansible.builtin.copy:
+    dest: "{{ cis_gdm_profile_file }}"
+    content: |
+      user-db:user
+      system-db:gdm
+      file-db:/usr/share/gdm/greeter-dconf-defaults
+    owner: root
+    group: root
+    mode: '0644'
+  when: system_profile == 'workstation'
+  notify: Update dconf databases
+
+- name: Restrict core dumps in /etc/security/limits.d/10-cis-coredump.conf
+  ansible.builtin.copy:
+    dest: /etc/security/limits.d/10-cis-coredump.conf
+    content: "* hard core 0\n"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Ensure AIDE is installed
+  ansible.builtin.package:
+    name: aide
+    state: present
+
+- name: Check if AIDE database exists
+  ansible.builtin.stat:
+    path: /var/lib/aide/aide.db.gz
+  register: aide_db_stat
+
+- name: Initialize AIDE database if not present
+  ansible.builtin.command:
+    cmd: aide --init
+  when: not aide_db_stat.stat.exists
+  changed_when: true
+  failed_when: false
+
+- name: Set system-wide crypto policy to DEFAULT
+  ansible.builtin.command:
+    cmd: update-crypto-policies --set DEFAULT
+  changed_when: false

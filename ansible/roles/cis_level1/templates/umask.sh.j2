@@ -1,0 +1,4 @@
+# Default system umask enforcement
+# Managed by Ansible
+
+umask {{ cis_default_umask | default('027') }}

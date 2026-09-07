@@ -1,0 +1,14 @@
+# CIS Benchmark Level 1 Unused Filesystems and Network Protocols Blacklist
+# Managed by Ansible
+
+# Unused Filesystems
+{% for fs in cis_disable_filesystems %}
+install {{ fs }} /bin/true
+blacklist {{ fs }}
+{% endfor %}
+
+# Unused Network Protocols
+{% for proto in cis_disable_network_protocols %}
+install {{ proto }} /bin/true
+blacklist {{ proto }}
+{% endfor %}

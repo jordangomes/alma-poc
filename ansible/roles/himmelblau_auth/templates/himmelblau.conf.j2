@@ -1,0 +1,22 @@
+# Himmelblau Configuration for Microsoft Entra ID Authentication
+# Managed by Ansible - Do not edit manually
+
+[global]
+domain = {{ himmelblau_domain }}
+tenant_id = {{ himmelblau_tenant_id }}
+{% if himmelblau_app_id | default('') | length > 0 %}
+app_id = {{ himmelblau_app_id }}
+{% endif %}
+log_level = info
+
+[pam]
+offline_cache = {{ himmelblau_offline_cache | string | lower }}
+homedir = {{ himmelblau_homedir_template }}
+default_shell = {{ himmelblau_default_shell }}
+require_mfa = {{ himmelblau_require_mfa | string | lower }}
+{% if himmelblau_enable_gdm | default(true) %}
+enable_gdm = true
+{% endif %}
+
+[nss]
+enum = false

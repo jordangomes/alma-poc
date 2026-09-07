@@ -1,0 +1,38 @@
+---
+# Global configuration variables for AlmaLinux 10 build
+
+# Target system profile: workstation | server
+system_profile: "workstation"
+
+# ansible-pull repository orchestration
+ansible_pull_repo_url: "https://github.com/jordangomes/alma-poc.git"
+ansible_pull_repo_branch: "main"
+ansible_pull_dest_dir: "/var/lib/ansible/local"
+ansible_pull_playbook_path: "ansible/local.yml"
+ansible_pull_inventory_path: "ansible/inventory/hosts.yml"
+ansible_pull_interval: "30min"
+ansible_pull_onboot_delay: "5min"
+ansible_pull_jitter: "5min"
+
+# Baseline system packages
+baseline_packages:
+  - git
+  - ansible-core
+  - python3
+  - python3-pip
+  - curl
+  - tar
+  - sudo
+  - chrony
+  - audit
+  - aide
+  - authselect
+  - policycoreutils-python-utils
+  - openscap-scanner
+  - scap-security-guide
+
+# Time synchronization
+ntp_servers:
+  - "2.almalinux.pool.ntp.org"
+  - "time.cloudflare.com"
+  - "time.google.com"

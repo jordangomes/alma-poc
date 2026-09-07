@@ -1,0 +1,43 @@
+---
+# Section 2: Services
+
+- name: Ensure chrony is installed and configured
+  ansible.builtin.package:
+    name: chrony
+    state: present
+
+- name: Configure NTP servers in chrony.conf
+  ansible.builtin.lineinfile:
+    path: /etc/chrony.conf
+    line: "server {{ item }} iburst"
+    state: present
+  loop: "{{ ntp_servers }}"
+
+- name: Ensure chronyd service is running and enabled
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Ensure legacy and insecure network services are removed
+  ansible.builtin.package:
+    name:
+      - telnet
+      - telnet-server
+      - rsh
+      - rsh-server
+      - ypbind
+      - tftp
+      - tftp-server
+      - talk
+      - talk-server
+      - xinetd
+    state: absent
+
+- name: Ensure legacy socket and service units are masked
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    masked: true
+    state: stopped
+  loop: "{{ cis_legacy_services_disabled }}"
+  failed_when: false

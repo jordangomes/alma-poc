@@ -1,0 +1,106 @@
+---
+# CIS Benchmark Level 1 Hardening configuration variables for Workstation & Server
+
+# CIS Profile toggle
+cis_profile: "workstation_l1"
+cis_use_oscap_remediation: false # Set true to run full SSG remediation tasks dynamically
+
+# Section 1: Initial Setup
+cis_disable_filesystems:
+  - cramfs
+  - freevxfs
+  - jffs2
+  - hfs
+  - hfsplus
+  - squashfs
+  - udf
+
+cis_system_warning_banner: |
+  *******************************************************************************
+  * AUTHORIZED ACCESS ONLY                                                      *
+  * This system is restricted to authorized corporate users for legitimate      *
+  * business purposes. All activities on this system are logged and monitored. *
+  * Unauthorized access is strictly prohibited and subject to prosecution.     *
+  *******************************************************************************
+
+# Section 2: Services
+cis_legacy_services_disabled:
+  - telnet
+  - rsh
+  - rlogin
+  - rexec
+  - ypbind
+  - tftp
+  - talk
+  - xinetd
+  - chargen-dgram
+  - chargen-stream
+  - daytime-dgram
+  - daytime-stream
+  - echo-dgram
+  - echo-stream
+  - tcpmux-server
+
+# Section 3: Network Configuration
+cis_disable_network_protocols:
+  - dccp
+  - sctp
+  - rds
+  - tipc
+
+cis_sysctl_settings:
+  # IP Forwarding
+  "net.ipv4.ip_forward": 0
+  "net.ipv6.conf.all.forwarding": 0
+  # ICMP redirects
+  "net.ipv4.conf.all.send_redirects": 0
+  "net.ipv4.conf.default.send_redirects": 0
+  "net.ipv4.conf.all.accept_redirects": 0
+  "net.ipv4.conf.default.accept_redirects": 0
+  "net.ipv4.conf.all.secure_redirects": 0
+  "net.ipv4.conf.default.secure_redirects": 0
+  "net.ipv6.conf.all.accept_redirects": 0
+  "net.ipv6.conf.default.accept_redirects": 0
+  # Source routing
+  "net.ipv4.conf.all.accept_source_route": 0
+  "net.ipv4.conf.default.accept_source_route": 0
+  "net.ipv6.conf.all.accept_source_route": 0
+  "net.ipv6.conf.default.accept_source_route": 0
+  # Reverse path filtering
+  "net.ipv4.conf.all.rp_filter": 1
+  "net.ipv4.conf.default.rp_filter": 1
+  # Logging martians
+  "net.ipv4.conf.all.log_martians": 1
+  "net.ipv4.conf.default.log_martians": 1
+  # TCP SYN Cookies & ICMP Echo broadcast
+  "net.ipv4.tcp_syncookies": 1
+  "net.ipv4.icmp_echo_ignore_broadcasts": 1
+  "net.ipv4.icmp_ignore_bogus_error_responses": 1
+  # ASLR & Core dumps
+  "kernel.randomize_va_space": 2
+  "fs.suid_dumpable": 0
+
+# Section 4: Logging and Auditing
+cis_auditd_max_log_file: 32
+cis_auditd_max_log_file_action: "ROTATE"
+cis_auditd_space_left: 75
+cis_auditd_space_left_action: "SYSLOG"
+cis_auditd_admin_space_left: 50
+cis_auditd_admin_space_left_action: "SUSPEND"
+
+# Section 5: Access, Authentication, and Authorization
+cis_sshd_port: 22
+cis_sshd_permit_root_login: "no"
+cis_sshd_max_auth_tries: 4
+cis_sshd_client_alive_interval: 300
+cis_sshd_client_alive_count_max: 3
+cis_sshd_permit_empty_passwords: "no"
+cis_sshd_x11_forwarding: "no"
+cis_sshd_login_grace_time: 60
+cis_sshd_use_pam: "yes"
+
+# Inactive account lock (days)
+cis_inactive_user_lock_days: 30
+
+# Default system umask
+cis_default_umask: "027"

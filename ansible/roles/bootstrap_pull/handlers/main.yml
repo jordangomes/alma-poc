@@ -1,0 +1,11 @@
+---
+# Handlers for bootstrap_pull
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart ansible-pull timer
+  ansible.builtin.systemd:
+    name: ansible-pull.timer
+    state: restarted

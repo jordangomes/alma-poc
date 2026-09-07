@@ -1,0 +1,5 @@
+---
+# Internal vars for himmelblau_auth
+himmelblau_config_dir: "/etc/himmelblau"
+himmelblau_config_file: "/etc/himmelblau/himmelblau.conf"
+himmelblau_sudoers_file: "/etc/sudoers.d/99-entra-admins"

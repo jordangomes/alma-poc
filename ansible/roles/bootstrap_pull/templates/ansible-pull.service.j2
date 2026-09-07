@@ -1,0 +1,21 @@
+[Unit]
+Description=Ansible Pull Configuration Convergence
+Documentation=https://docs.ansible.com/ansible/latest/cli/ansible-pull.html
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory={{ ansible_pull_dest_dir }}
+ExecStart=/usr/bin/ansible-pull \
+    -U {{ ansible_pull_repo_url }} \
+    -C {{ ansible_pull_repo_branch }} \
+    -d {{ ansible_pull_dest_dir }} \
+    -i {{ ansible_pull_inventory_path }} \
+    {{ ansible_pull_playbook_path }}
+StandardOutput=journal+console
+StandardError=journal+console
+SuccessExitStatus=0 2
+
+[Install]
+WantedBy=multi-user.target

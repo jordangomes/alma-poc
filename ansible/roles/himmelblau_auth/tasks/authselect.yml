@@ -1,0 +1,26 @@
+---
+# Configure authselect for Himmelblau PAM and NSS stack
+
+- name: Check current authselect profile
+  ansible.builtin.command:
+    cmd: authselect current
+  register: authselect_current_output
+  changed_when: false
+  failed_when: false
+
+- name: Construct authselect select command
+  ansible.builtin.set_fact:
+    authselect_features_str: "{{ himmelblau_authselect_features | join(' ') }}"
+
+- name: Apply himmelblau authselect profile
+  ansible.builtin.command:
+    cmd: "authselect select himmelblau {{ authselect_features_str }} --force"
+  register: authselect_select_res
+  changed_when: "'Profile \"himmelblau\" was selected' in authselect_select_res.stdout or authselect_select_res.rc == 0"
+  when: "'Profile ID: himmelblau' not in authselect_current_output.stdout"
+  notify: Reload authselect
+
+- name: Ensure authselect configuration is valid and backed up
+  ansible.builtin.command:
+    cmd: authselect check
+  changed_when: false

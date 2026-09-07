@@ -1,0 +1,14 @@
+---
+# Manage Himmelblau systemd services
+
+- name: Ensure himmelblaud service is enabled and started
+  ansible.builtin.systemd:
+    name: himmelblaud
+    state: started
+    enabled: true
+
+- name: Ensure himmelblaud-tasks service is enabled and started
+  ansible.builtin.systemd:
+    name: himmelblaud-tasks
+    state: started
+    enabled: true

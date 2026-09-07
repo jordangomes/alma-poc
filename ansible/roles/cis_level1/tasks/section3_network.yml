@@ -1,0 +1,31 @@
+---
+# Section 3: Network Configuration
+
+- name: Deploy sysctl CIS hardening settings
+  ansible.builtin.template:
+    src: sysctl_cis.conf.j2
+    dest: "{{ cis_sysctl_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload sysctl
+
+- name: Ensure firewalld is installed
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+
+- name: Ensure firewalld service is enabled and started
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Allow SSH service in public zone
+  ansible.posix.firewalld:
+    service: ssh
+    zone: public
+    permanent: true
+    state: enabled
+  notify: Reload sysctl
+  failed_when: false

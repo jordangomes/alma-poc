@@ -1,0 +1,25 @@
+# Ansible artifacts
+*.retry
+*.pyc
+__pycache__/
+.ansible/
+
+# ISO & VM testing artifacts
+*.iso
+*.qcow2
+*.raw
+*.img
+/iso-build/
+/vm-test/
+
+# Scan results and logs
+/tmp/
+*.xml
+*.html
+ks-post.log
+ansible-pull.log
+
+# Local secrets & overrides
+secrets.yml
+vault_pass.txt
+.env

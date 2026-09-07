@@ -1,0 +1,25 @@
+---
+# Main entrypoint for role cis_level1
+
+- name: "Execute OpenSCAP SSG automated remediation (optional)"
+  ansible.builtin.include_tasks: oscap_remediation.yml
+  when: cis_use_oscap_remediation | default(false) | bool
+
+- name: "Enforce Section 1: Initial Setup"
+  ansible.builtin.include_tasks: section1_initial_setup.yml
+
+- name: "Enforce Section 2: Services"
+  ansible.builtin.include_tasks: section2_services.yml
+
+- name: "Enforce Section 3: Network Configuration"
+  ansible.builtin.include_tasks: section3_network.yml
+
+- name: "Enforce Section 4: Logging and Auditing"
+  ansible.builtin.include_tasks: section4_logging_auditing.yml
+
+- name: "Enforce Section 5: Access, Authentication, and Authorization"
+  ansible.builtin.include_tasks: section5_access_auth.yml
+
+- name: "Enforce Section 6: System Maintenance & Permissions"
+  ansible.builtin.include_tasks: section6_system_maintenance.yml
+

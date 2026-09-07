@@ -1,0 +1,16 @@
+---
+# Handlers for himmelblau_auth
+
+- name: Restart himmelblau daemons
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - himmelblaud
+    - himmelblaud-tasks
+  failed_when: false
+
+- name: Reload authselect
+  ansible.builtin.command:
+    cmd: authselect apply-changes
+  changed_when: true

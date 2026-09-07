@@ -1,0 +1,40 @@
+---
+# Main orchestration playbook for AlmaLinux 10 local configuration convergence
+- name: AlmaLinux 10 Automated Build & Hardening Orchestration
+  hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure baseline system packages are installed
+      ansible.builtin.package:
+        name: "{{ baseline_packages }}"
+        state: present
+
+    - name: Ensure chronyd is enabled and running
+      ansible.builtin.service:
+        name: chronyd
+        state: started
+        enabled: true
+
+  roles:
+    - role: bootstrap_pull
+      tags: [bootstrap, pull, systemd]
+
+    - role: himmelblau_auth
+      tags: [auth, himmelblau, entra, sso]
+
+    - role: cis_level1
+      tags: [security, cis, hardening, compliance]
+
+  post_tasks:
+    - name: Output deployment summary
+      ansible.builtin.debug:
+        msg:
+          - "========================================================"
+          - " AlmaLinux 10 Configuration Convergence Completed       "
+          - " Profile: {{ system_profile }}                          "
+          - " Himmelblau Domain: {{ himmelblau_domain }}             "
+          - " CIS Benchmark Level: Level 1 (Workstation)            "
+          - " ansible-pull Timer: Active (every {{ ansible_pull_interval }})"
+          - "========================================================"
