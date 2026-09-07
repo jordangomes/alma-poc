@@ -123,7 +123,7 @@ echo "Launching QEMU Virtual Machine..."
     -cpu host \
     -drive file="$DISK_PATH",format=qcow2,if=virtio \
     -cdrom "$ISO_PATH" \
-    -boot d \
+    -boot order=c,once=d \
     -netdev user,id=net0,hostfwd=tcp::2222-:22 \
     -device virtio-net-pci,netdev=net0 \
     -vga virtio \
