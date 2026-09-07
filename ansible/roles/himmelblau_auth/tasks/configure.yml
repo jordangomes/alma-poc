@@ -7,7 +7,7 @@
     state: directory
     owner: root
     group: root
-    mode: '0750'
+    mode: '0755'
 
 - name: Deploy himmelblau.conf
   ansible.builtin.template:
@@ -15,7 +15,7 @@
     dest: "{{ himmelblau_config_file }}"
     owner: root
     group: root
-    mode: '0600'
+    mode: '0644'
   notify: Restart himmelblau daemons
 
 - name: Deploy sudoers rules for Entra ID administrator groups
