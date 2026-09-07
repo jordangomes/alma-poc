@@ -11,12 +11,15 @@
 
     - name: Configure Himmelblau configuration and sudoers
       ansible.builtin.include_tasks: configure.yml
+      when: himmelblau_install_res is not failed and (himmelblau_install_res.changed or himmelblau_install_res.rc is not defined or himmelblau_install_res.rc == 0)
 
     - name: Configure system authselect profile for Himmelblau
       ansible.builtin.include_tasks: authselect.yml
+      when: himmelblau_install_res is not failed and (himmelblau_install_res.changed or himmelblau_install_res.rc is not defined or himmelblau_install_res.rc == 0)
 
     - name: Manage Himmelblau services
       ansible.builtin.include_tasks: service.yml
+      when: himmelblau_install_res is not failed and (himmelblau_install_res.changed or himmelblau_install_res.rc is not defined or himmelblau_install_res.rc == 0)
 
   rescue:
     - name: Report Himmelblau deployment warning

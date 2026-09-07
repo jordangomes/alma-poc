@@ -5,3 +5,10 @@
   ansible.builtin.package:
     name: "{{ himmelblau_packages }}"
     state: present
+  register: himmelblau_install_res
+  ignore_errors: true
+
+- name: Notify if Himmelblau packages could not be installed
+  ansible.builtin.debug:
+    msg: "Himmelblau package installation skipped or not found in repository. Continuing build."
+  when: himmelblau_install_res is failed

@@ -5,9 +5,14 @@
   ansible.builtin.yum_repository:
     name: himmelblau
     description: Himmelblau IDM Repository for Enterprise Linux 10
-    baseurl: "{{ himmelblau_repo_baseurl }}"
+    baseurl:
+      - "{{ himmelblau_repo_baseurl }}"
+      - "https://packages.himmelblau-idm.org/stable/latest/rocky10/$basearch"
+      - "https://packages.himmelblau-idm.org/nightly/latest/rocky10/$basearch"
+      - "https://packages.himmelblau-idm.org/stable/latest/rocky10"
     gpgkey: "{{ himmelblau_repo_gpgkey }}"
     gpgcheck: "{{ himmelblau_repo_gpgcheck }}"
     enabled: "{{ himmelblau_repo_enabled }}"
     repo_gpgcheck: false
+    skip_if_unavailable: false
     state: present
