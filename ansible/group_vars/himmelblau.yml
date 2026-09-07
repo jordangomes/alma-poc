@@ -2,7 +2,7 @@
 # Microsoft Entra ID (Azure AD) and Himmelblau configuration variables
 
 # Official Himmelblau repository for Enterprise Linux 10
-himmelblau_repo_baseurl: "https://packages.himmelblau-idm.org/stable/latest/rocky10/$basearch"
+himmelblau_repo_baseurl: "https://packages.himmelblau-idm.org/stable/latest/rocky10"
 himmelblau_repo_gpgkey: "https://packages.himmelblau-idm.org/himmelblau.asc"
 himmelblau_repo_enabled: true
 himmelblau_repo_gpgcheck: true
