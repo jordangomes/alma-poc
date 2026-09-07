@@ -1,0 +1,38 @@
+---
+# Defaults for himmelblau_auth role
+
+# Official Himmelblau repository for Enterprise Linux 10
+himmelblau_repo_baseurl: "https://pkg.himmelblau-idm.org/el10/$basearch"
+himmelblau_repo_gpgkey: "https://pkg.himmelblau-idm.org/RPM-GPG-KEY-himmelblau"
+himmelblau_repo_enabled: true
+himmelblau_repo_gpgcheck: true
+
+# Himmelblau packages
+himmelblau_packages:
+  - himmelblau
+  - himmelblau-tasks
+  - authselect
+  - pam
+  - pam-pkcs11
+
+# Microsoft Entra ID Tenant Settings
+himmelblau_domain: "example.com"
+himmelblau_tenant_id: ""
+himmelblau_app_id: ""
+
+# Authentication and PAM settings
+himmelblau_offline_cache: true
+himmelblau_homedir_template: "/home/%u@%d"
+himmelblau_default_shell: "/bin/bash"
+himmelblau_require_mfa: true
+himmelblau_enable_gdm: true
+
+# Authselect profile options
+himmelblau_authselect_features:
+  - "with-mfa"
+  - "with-silent-lastlog"
+  - "with-sudo"
+  - "with-gdm"
+
+# Entra ID Security Groups with sudo privileges
+himmelblau_sudo_groups: []

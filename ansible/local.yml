@@ -5,6 +5,11 @@
   become: true
   gather_facts: true
 
+  vars_files:
+    - group_vars/all.yml
+    - group_vars/himmelblau.yml
+    - group_vars/cis_hardening.yml
+
   pre_tasks:
     - name: Ensure baseline system packages are installed
       ansible.builtin.package:

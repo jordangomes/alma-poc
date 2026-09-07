@@ -6,6 +6,8 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
+Environment="LC_ALL=C.UTF-8"
+Environment="LANG=C.UTF-8"
 WorkingDirectory=/var/lib/ansible/local
 ExecStart=/usr/bin/ansible-pull \
     -U https://github.com/example-org/alma-poc.git \

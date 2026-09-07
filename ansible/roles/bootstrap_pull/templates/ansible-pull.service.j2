@@ -6,6 +6,8 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
+Environment="LC_ALL=C.UTF-8"
+Environment="LANG=C.UTF-8"
 WorkingDirectory={{ ansible_pull_dest_dir }}
 ExecStart=/usr/bin/ansible-pull \
     -U {{ ansible_pull_repo_url }} \
