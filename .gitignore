@@ -3,6 +3,9 @@
 *.pyc
 __pycache__/
 .ansible/
+collections/
+ansible/collections/
+
 
 # ISO & VM testing artifacts
 *.iso
