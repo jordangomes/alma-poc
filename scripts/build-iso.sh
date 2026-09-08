@@ -92,6 +92,12 @@ fi
 # Remove existing output file if present to avoid xorriso media conflict
 rm -f "$OUTPUT_ISO"
 
+# Ensure Ansible collections are baked into the ISO for offline installation
+if [ -f "ansible/requirements.yml" ] && command -v ansible-galaxy &>/dev/null; then
+    echo "Pre-downloading required Ansible collections into ansible/collections for baked ISO..."
+    ansible-galaxy collection install -r ansible/requirements.yml -p ansible/collections --upgrade || true
+fi
+
 # Build xorriso map arguments only for files that actually exist
 XORRISO_MAP_ARGS=()
 XORRISO_MAP_ARGS+=(-map "$KS_FILE" /ks.cfg)
