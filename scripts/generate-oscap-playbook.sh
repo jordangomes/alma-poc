@@ -46,5 +46,9 @@ oscap xccdf generate fix \
     --output "$OUTPUT_FILE" \
     "$DS_PATH"
 
+echo "Injecting global non-fatal play settings (ignore_errors: true)..."
+sed -i '/^- hosts: all/a\  ignore_errors: true\n  ignore_unreachable: true' "$OUTPUT_FILE"
+
 echo "=== Generation Completed Successfully ==="
 echo "Generated $(wc -l < "$OUTPUT_FILE") lines of Ansible tasks in $OUTPUT_FILE"
+

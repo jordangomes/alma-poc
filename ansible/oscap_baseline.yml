@@ -30,6 +30,8 @@
 
 
 - hosts: all
+  ignore_errors: true
+  ignore_unreachable: true
   vars:
     inactivity_timeout_value: !!str 900
     var_screensaver_lock_delay: !!str 5

@@ -22,12 +22,6 @@
         state: started
         enabled: true
 
-    - name: Ensure firewalld is enabled and running
-      ansible.builtin.service:
-        name: firewalld
-        state: started
-        enabled: true
-      failed_when: false
 
 
   roles:
