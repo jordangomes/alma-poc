@@ -30,6 +30,7 @@ baseline_packages:
   - policycoreutils-python-utils
   - openscap-scanner
   - scap-security-guide
+  - firewalld
 
 # Time synchronization
 ntp_servers:

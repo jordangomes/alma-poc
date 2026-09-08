@@ -1,12 +1,16 @@
 ---
 # Manage Himmelblau systemd services
 
+- name: Reload systemd daemon to discover new Himmelblau units
+  ansible.builtin.systemd:
+    daemon_reload: true
+
 - name: Ensure himmelblaud daemon is enabled and started
   ansible.builtin.systemd:
     name: himmelblaud
     state: started
     enabled: true
-  ignore_errors: true
+  failed_when: false
 
 - name: Check if himmelblaud-tasks unit exists
   ansible.builtin.stat:
@@ -19,4 +23,5 @@
     state: started
     enabled: true
   when: himmelblaud_tasks_unit.stat.exists
-  ignore_errors: true
+  failed_when: false
+

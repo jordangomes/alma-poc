@@ -18,10 +18,9 @@ himmelblau_debug: false
 himmelblau_pam_allow_groups: []
 
 himmelblau_authselect_features:
-  - "with-mfa"
+  - "with-mkhomedir"
   - "with-silent-lastlog"
-  - "with-sudo"
-  - "with-gdm"
+  - "with-faillock"
 
 himmelblau_sudo_groups:
   - name: "aad_linux_admins"

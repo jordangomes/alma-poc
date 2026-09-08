@@ -1,6 +1,13 @@
 ---
 # Configure Himmelblau official RPM repository for Enterprise Linux 10
 
+- name: Import Himmelblau repository GPG key
+  ansible.builtin.rpm_key:
+    key: "{{ himmelblau_repo_gpgkey }}"
+    state: present
+  when: himmelblau_repo_gpgcheck | bool
+  failed_when: false
+
 - name: Deploy Himmelblau yum/dnf repository configuration
   ansible.builtin.yum_repository:
     name: himmelblau
@@ -12,3 +19,4 @@
     repo_gpgcheck: false
     skip_if_unavailable: false
     state: present
+

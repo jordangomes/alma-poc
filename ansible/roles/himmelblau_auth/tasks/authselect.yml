@@ -12,15 +12,26 @@
   ansible.builtin.set_fact:
     authselect_features_str: "{{ himmelblau_authselect_features | join(' ') }}"
 
-- name: Apply himmelblau authselect profile
+- name: Apply himmelblau authselect profile (vendor/himmelblau)
+  ansible.builtin.command:
+    cmd: "authselect select vendor/himmelblau {{ authselect_features_str }} --force"
+  register: authselect_select_res
+  changed_when: "'Profile' in authselect_select_res.stdout or authselect_select_res.rc == 0"
+  when: "'himmelblau' not in authselect_current_output.stdout"
+  notify: Reload authselect
+  failed_when: false
+
+- name: Fallback to standard himmelblau profile name if vendor/ prefix is not required
   ansible.builtin.command:
     cmd: "authselect select himmelblau {{ authselect_features_str }} --force"
-  register: authselect_select_res
-  changed_when: "'Profile \"himmelblau\" was selected' in authselect_select_res.stdout or authselect_select_res.rc == 0"
-  when: "'Profile ID: himmelblau' not in authselect_current_output.stdout"
+  when:
+    - "'himmelblau' not in authselect_current_output.stdout"
+    - authselect_select_res is failed or (authselect_select_res.rc is defined and authselect_select_res.rc != 0)
   notify: Reload authselect
 
-- name: Ensure authselect configuration is valid and backed up
+- name: Ensure authselect configuration is valid
   ansible.builtin.command:
     cmd: authselect check
   changed_when: false
+  failed_when: false
+

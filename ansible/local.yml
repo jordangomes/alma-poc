@@ -1,10 +1,5 @@
 ---
-# 1. Apply OpenSCAP-generated compliance baseline playbook
-- name: Apply OpenSCAP Security Baseline
-  ansible.builtin.import_playbook: oscap_baseline.yml
-  tags: [security, oscap, baseline]
-
-# 2. Main orchestration playbook for AlmaLinux 10 local configuration convergence & identity
+# 1. Main orchestration playbook for AlmaLinux 10 local configuration convergence & identity
 - name: AlmaLinux 10 Workstation Fleet Orchestration
   hosts: all
   become: true
@@ -27,6 +22,14 @@
         state: started
         enabled: true
 
+    - name: Ensure firewalld is enabled and running
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: true
+      failed_when: false
+
+
   roles:
     - role: bootstrap_pull
       tags: [bootstrap, pull, systemd]
@@ -48,4 +51,10 @@
           - " SCAP Profile: {{ oscap_profile }}                      "
           - " ansible-pull Timer: Active (every {{ ansible_pull_interval }})"
           - "========================================================"
+
+# 2. Apply OpenSCAP-generated compliance baseline playbook
+- name: Apply OpenSCAP Security Baseline
+  ansible.builtin.import_playbook: oscap_baseline.yml
+  tags: [security, oscap, baseline]
+
 
