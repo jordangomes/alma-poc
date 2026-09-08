@@ -9,7 +9,6 @@ Type=oneshot
 Environment="LC_ALL=C.UTF-8"
 Environment="LANG=C.UTF-8"
 WorkingDirectory={{ ansible_pull_dest_dir }}
-ExecStartPre=-/bin/sh -c 'if [ -f "{{ ansible_pull_dest_dir }}/ansible/requirements.yml" ]; then /usr/bin/ansible-galaxy collection install -r "{{ ansible_pull_dest_dir }}/ansible/requirements.yml" -p /usr/share/ansible/collections; fi'
 ExecStart=/usr/bin/ansible-pull \
     -U {{ ansible_pull_repo_url }} \
     -C {{ ansible_pull_repo_branch }} \

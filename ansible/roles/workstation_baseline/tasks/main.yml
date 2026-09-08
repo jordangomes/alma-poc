@@ -1,6 +1,60 @@
 ---
 # Enterprise Workstation Overrides & Post-OSCAP Hardening Adjustments
 
+- name: Ensure gnome-initial-setup and firstboot setup packages are removed
+  ansible.builtin.package:
+    name:
+      - gnome-initial-setup
+      - initial-setup
+      - initial-setup-gui
+    state: absent
+  when: system_profile == 'workstation'
+  failed_when: false
+
+- name: Configure GDM custom.conf to disable InitialSetup
+  community.general.ini_file:
+    path: /etc/gdm/custom.conf
+    section: daemon
+    option: InitialSetupEnable
+    value: "false"
+    mode: '0644'
+  when: system_profile == 'workstation'
+  failed_when: false
+
+- name: Ensure GDM dconf database directory exists
+  ansible.builtin.file:
+    path: /etc/dconf/db/gdm.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: system_profile == 'workstation'
+
+- name: Configure GDM to disable user list (show direct enterprise login prompt)
+  ansible.builtin.copy:
+    dest: /etc/dconf/db/gdm.d/00-login-screen
+    content: |
+      [org/gnome/login-screen]
+      disable-user-list=true
+    owner: root
+    group: root
+    mode: '0644'
+  when: system_profile == 'workstation'
+  notify: Update dconf databases
+
+- name: Ensure GDM dconf profile is configured
+  ansible.builtin.copy:
+    dest: /etc/dconf/profile/gdm
+    content: |
+      user-db:user
+      system-db:gdm
+      file-db:/usr/share/gdm/greeter-dconf-defaults
+    owner: root
+    group: root
+    mode: '0644'
+  when: system_profile == 'workstation'
+  notify: Update dconf databases
+
 - name: Hide local break-glass admin from GDM user list
   ansible.builtin.copy:
     dest: /var/lib/AccountsService/users/almaadmin
@@ -42,4 +96,5 @@
     mode: '0600'
   when: not aide_db_stat.stat.exists
   failed_when: false
+
 
