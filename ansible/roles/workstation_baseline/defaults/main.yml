@@ -1,0 +1,5 @@
+---
+# Defaults for workstation_baseline role
+workstation_aide_initialize: true
+
+

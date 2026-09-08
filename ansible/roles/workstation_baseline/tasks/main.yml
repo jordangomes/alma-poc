@@ -1,0 +1,45 @@
+---
+# Enterprise Workstation Overrides & Post-OSCAP Hardening Adjustments
+
+- name: Hide local break-glass admin from GDM user list
+  ansible.builtin.copy:
+    dest: /var/lib/AccountsService/users/almaadmin
+    content: |
+      [User]
+      SystemAccount=true
+    owner: root
+    group: root
+    mode: '0600'
+  when: system_profile == 'workstation'
+  failed_when: false
+
+- name: Ensure GDM dconf update is executed
+  ansible.builtin.command:
+    cmd: dconf update
+  changed_when: false
+  when: system_profile == 'workstation'
+  failed_when: false
+
+- name: Check if AIDE database exists
+  ansible.builtin.stat:
+    path: /var/lib/aide/aide.db.gz
+  register: aide_db_stat
+
+- name: Initialize AIDE database if not present
+  ansible.builtin.command:
+    cmd: aide --init
+  when: not aide_db_stat.stat.exists
+  changed_when: true
+  failed_when: false
+
+- name: Copy AIDE database into place if freshly generated
+  ansible.builtin.copy:
+    src: /var/lib/aide/aide.db.new.gz
+    dest: /var/lib/aide/aide.db.gz
+    remote_src: true
+    owner: root
+    group: root
+    mode: '0600'
+  when: not aide_db_stat.stat.exists
+  failed_when: false
+

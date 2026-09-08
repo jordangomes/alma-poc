@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: generate-cis-from-oscap.sh
-# Purpose: Uses oscap CLI to generate Ansible CIS Level 1 remediation tasks
+# Script: generate-oscap-playbook.sh
+# Purpose: Uses oscap CLI to generate an Ansible compliance remediation playbook
 #          from the official SCAP Security Guide (SSG) datastream.
+# Usage: ./scripts/generate-oscap-playbook.sh [PROFILE_ID] [OUTPUT_FILE]
 # ==============================================================================
 
 set -euo pipefail
 
-PROFILE="xccdf_org.ssgproject.content_profile_cis_workstation_l1"
-OUTPUT_FILE="ansible/roles/cis_level1/tasks/oscap_generated_remediations.yml"
+PROFILE="${1:-xccdf_org.ssgproject.content_profile_cis_workstation_l1}"
+OUTPUT_FILE="${2:-ansible/oscap_baseline.yml}"
 DS_SEARCH_PATHS=(
     "/usr/share/xml/scap/ssg/content/ssg-almalinux10-ds.xml"
     "/usr/share/xml/scap/ssg/content/ssg-cs10-ds.xml"

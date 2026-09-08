@@ -53,11 +53,12 @@ for path in "${DS_SEARCH_PATHS[@]}"; do
 done
 
 if [ -n "$DS_PATH" ] && command -v oscap &>/dev/null; then
-    REPORT_FILE="/tmp/cis-report.html"
-    RESULTS_FILE="/tmp/cis-results.xml"
-    PROFILE="xccdf_org.ssgproject.content_profile_cis_workstation_l1"
+    REPORT_FILE="/tmp/compliance-report.html"
+    RESULTS_FILE="/tmp/compliance-results.xml"
+    PROFILE="${1:-xccdf_org.ssgproject.content_profile_cis_workstation_l1}"
 
-    echo "Running oscap xccdf eval against $DS_PATH..."
+    echo "Running oscap xccdf eval with profile: $PROFILE"
+    echo "Using DataStream: $DS_PATH..."
     oscap xccdf eval \
         --profile "$PROFILE" \
         --results "$RESULTS_FILE" \
@@ -73,5 +74,6 @@ fi
 
 echo ""
 echo "================================================================================"
-echo " Verification Complete. Review the results above or check /tmp/cis-report.html "
+echo " Verification Complete. Review the results above or check /tmp/compliance-report.html "
 echo "================================================================================"
+

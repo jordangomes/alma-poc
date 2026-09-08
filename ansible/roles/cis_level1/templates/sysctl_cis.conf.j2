@@ -1,6 +1,0 @@
-# CIS Benchmark Level 1 Sysctl Kernel Hardening
-# Managed by Ansible
-
-{% for key, val in cis_sysctl_settings.items() %}
-{{ key }} = {{ val }}
-{% endfor %}

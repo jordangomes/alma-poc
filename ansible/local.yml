@@ -1,6 +1,11 @@
 ---
-# Main orchestration playbook for AlmaLinux 10 local configuration convergence
-- name: AlmaLinux 10 Automated Build & Hardening Orchestration
+# 1. Apply OpenSCAP-generated compliance baseline playbook
+- name: Apply OpenSCAP Security Baseline
+  ansible.builtin.import_playbook: oscap_baseline.yml
+  tags: [security, oscap, baseline]
+
+# 2. Main orchestration playbook for AlmaLinux 10 local configuration convergence & identity
+- name: AlmaLinux 10 Workstation Fleet Orchestration
   hosts: all
   become: true
   gather_facts: true
@@ -8,7 +13,7 @@
   vars_files:
     - group_vars/all.yml
     - group_vars/himmelblau.yml
-    - group_vars/cis_hardening.yml
+    - group_vars/security.yml
 
   pre_tasks:
     - name: Ensure baseline system packages are installed
@@ -29,8 +34,8 @@
     - role: himmelblau_auth
       tags: [auth, himmelblau, entra, sso]
 
-    - role: cis_level1
-      tags: [security, cis, hardening, compliance]
+    - role: workstation_baseline
+      tags: [workstation, customization]
 
   post_tasks:
     - name: Output deployment summary
@@ -40,6 +45,7 @@
           - " AlmaLinux 10 Configuration Convergence Completed       "
           - " Profile: {{ system_profile }}                          "
           - " Himmelblau Domain: {{ himmelblau_domain }}             "
-          - " CIS Benchmark Level: Level 1 (Workstation)            "
+          - " SCAP Profile: {{ oscap_profile }}                      "
           - " ansible-pull Timer: Active (every {{ ansible_pull_interval }})"
           - "========================================================"
+

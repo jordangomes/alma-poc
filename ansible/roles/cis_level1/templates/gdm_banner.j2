@@ -1,6 +1,0 @@
-# GDM Login Banner Configuration for CIS Workstation
-# Managed by Ansible
-
-[org/gnome/login-screen]
-banner-message-enable=true
-banner-message-text='{{ cis_system_warning_banner | replace("\n", " ") | trim }}'

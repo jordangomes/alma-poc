@@ -1,0 +1,12 @@
+---
+# OpenSCAP Security Baseline & Workstation Hardening Parameters
+
+# OpenSCAP Profile Configuration
+oscap_profile: "xccdf_org.ssgproject.content_profile_cis_workstation_l1"
+oscap_datastream: "/usr/share/xml/scap/ssg/content/ssg-almalinux10-ds.xml"
+
+# Workstation Baseline Adjustments
+workstation_hide_admin_from_gdm: true
+workstation_aide_initialize: true
+workstation_breakglass_user: "almaadmin"
+
