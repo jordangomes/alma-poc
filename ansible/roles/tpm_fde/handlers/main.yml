@@ -1,0 +1,7 @@
+---
+# Handlers for tpm_fde role
+
+- name: Regenerate dracut initramfs
+  ansible.builtin.command:
+    cmd: dracut -f --regenerate-all
+  when: tpm_fde_dracut_regenerate | bool

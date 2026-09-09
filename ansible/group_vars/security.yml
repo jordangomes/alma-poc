@@ -10,3 +10,12 @@ workstation_hide_admin_from_gdm: true
 workstation_aide_initialize: true
 workstation_breakglass_user: "almaadmin"
 
+# TPM 2.0 & Full Disk Encryption (LUKS2) Parameters
+tpm_fde_enabled: true
+tpm_fde_pcrs: "7"
+tpm_fde_crypttab_options: "tpm2-device=auto,discard"
+tpm_fde_generate_recovery_key: true
+tpm_fde_escrow_backend: "local"
+tpm_fde_escrow_local_path: "/root/.luks-recovery-key.txt"
+
+

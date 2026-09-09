@@ -12,8 +12,15 @@ ansible/collections/
 *.qcow2
 *.raw
 *.img
+*.fd
+*.vars
+.alma10-tpm-state/
+*tpm-state*/
+*.sock
+*recovery-key*.txt
 /iso-build/
 /vm-test/
+
 
 # Scan results and logs
 /tmp/

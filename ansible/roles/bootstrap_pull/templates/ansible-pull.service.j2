@@ -8,8 +8,12 @@ Wants=network-online.target
 Type=oneshot
 Environment="LC_ALL=C.UTF-8"
 Environment="LANG=C.UTF-8"
-WorkingDirectory={{ ansible_pull_dest_dir }}
+ExecStartPre=/usr/bin/git config --system --add safe.directory {{ ansible_pull_dest_dir }}
+ExecStartPre=/bin/bash -c 'if [ -d "{{ ansible_pull_dest_dir }}" ] && [ ! -d "{{ ansible_pull_dest_dir }}/.git" ]; then rm -rf "{{ ansible_pull_dest_dir }}"; fi'
+ExecStartPre=/bin/bash -c 'if [ -f "{{ ansible_pull_dest_dir }}/ansible/requirements.yml" ]; then ansible-galaxy collection install -r "{{ ansible_pull_dest_dir }}/ansible/requirements.yml" -p /usr/share/ansible/collections || true; else ansible-galaxy collection install ansible.posix community.general -p /usr/share/ansible/collections || true; fi'
 ExecStart=/usr/bin/ansible-pull \
+    --clean \
+    --accept-host-key \
     -U {{ ansible_pull_repo_url }} \
     -C {{ ansible_pull_repo_branch }} \
     -d {{ ansible_pull_dest_dir }} \
@@ -18,6 +22,8 @@ ExecStart=/usr/bin/ansible-pull \
 StandardOutput=journal+console
 StandardError=journal+console
 SuccessExitStatus=0 2
+Restart=on-failure
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,113 @@
+---
+# Tasks for TPM 2.0 & LUKS2 Full Disk Encryption Automation
+
+- name: Ensure TPM 2.0 and encryption management packages are installed
+  ansible.builtin.package:
+    name: "{{ tpm_fde_packages }}"
+    state: present
+  when: tpm_fde_enabled | bool
+
+- name: Check for TPM 2.0 resource manager device
+  ansible.builtin.stat:
+    path: /dev/tpmrm0
+  register: tpm_dev_stat
+
+- name: Check for alternative TPM 2.0 character device
+  ansible.builtin.stat:
+    path: /dev/tpm0
+  register: tpm0_dev_stat
+  when: not tpm_dev_stat.stat.exists
+
+- name: Set TPM 2.0 availability fact
+  ansible.builtin.set_fact:
+    tpm2_available: "{{ tpm_dev_stat.stat.exists or (tpm0_dev_stat.stat is defined and tpm0_dev_stat.stat.exists) }}"
+
+- name: Output TPM 2.0 hardware status
+  ansible.builtin.debug:
+    msg: "TPM 2.0 hardware device detected: {{ tpm2_available }}"
+
+- name: Discover crypto_LUKS block devices
+  ansible.builtin.command:
+    cmd: blkid -t TYPE=crypto_LUKS -o device
+  register: luks_devices_cmd
+  changed_when: false
+  failed_when: false
+
+- name: Set list of LUKS devices
+  ansible.builtin.set_fact:
+    luks_devices: "{{ luks_devices_cmd.stdout_lines | default([]) }}"
+
+- name: Process LUKS Full Disk Encryption Devices
+  when:
+    - tpm_fde_enabled | bool
+    - luks_devices | length > 0
+  block:
+    - name: Query LUKS header and tokens for each LUKS device
+      ansible.builtin.command:
+        cmd: "cryptsetup luksDump {{ item }}"
+      register: luks_dump_results
+      loop: "{{ luks_devices }}"
+      changed_when: false
+
+    - name: Configure TPM 2.0 Auto-Unlock and Recovery Keys for LUKS Devices
+      ansible.builtin.include_tasks: device_enroll.yml
+      loop: "{{ luks_dump_results.results }}"
+      loop_control:
+        loop_var: dump_item
+
+- name: Ensure dracut module configuration for TPM2 and LUKS exists
+  ansible.builtin.copy:
+    dest: /etc/dracut.conf.d/tpm2-fde.conf
+    content: |
+      # Enforce tpm2-tss and crypt modules in initramfs for TPM-bound auto-unlock
+      add_dracutmodules+=" tpm2-tss crypt "
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Regenerate dracut initramfs
+  when: tpm_fde_enabled | bool
+
+- name: Audit /etc/crypttab for tpm2-device option
+  ansible.builtin.stat:
+    path: /etc/crypttab
+  register: crypttab_stat
+
+- name: Update /etc/crypttab to ensure tpm2-device=auto is configured
+  ansible.builtin.shell: |
+    python3 -c '
+    import sys
+    lines = open("/etc/crypttab").readlines()
+    out = []
+    changed = False
+    for line in lines:
+        s = line.strip()
+        if not s or s.startswith("#"):
+            out.append(line)
+            continue
+        parts = s.split()
+        if len(parts) >= 3:
+            if len(parts) == 3:
+                parts.append("{{ tpm_fde_crypttab_options }}")
+                changed = True
+            elif "tpm2-device" not in parts[3]:
+                parts[3] = parts[3].rstrip(",") + ",tpm2-device=auto"
+                changed = True
+            out.append(" ".join(parts) + "\n")
+        else:
+            out.append(line)
+    if changed:
+        with open("/etc/crypttab", "w") as f:
+            f.writelines(out)
+        print("CHANGED")
+    '
+  register: crypttab_update_cmd
+  changed_when: "'CHANGED' in crypttab_update_cmd.stdout"
+  notify: Regenerate dracut initramfs
+  when:
+    - tpm_fde_enabled | bool
+    - tpm2_available | bool
+    - crypttab_stat.stat.exists
+
+- name: Flush handlers to apply dracut initramfs changes immediately
+  ansible.builtin.meta: flush_handlers
+

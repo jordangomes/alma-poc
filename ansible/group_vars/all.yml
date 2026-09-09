@@ -18,6 +18,9 @@ ansible_pull_jitter: "5min"
 baseline_packages:
   - git
   - ansible-core
+  - epel-release
+  - ansible-collection-ansible-posix
+  - ansible-collection-community-general
   - python3
   - python3-pip
   - curl
@@ -30,6 +33,13 @@ baseline_packages:
   - policycoreutils-python-utils
   - openscap-scanner
   - scap-security-guide
+  - tpm2-tools
+  - tpm2-tss
+  - cryptsetup
+  - mokutil
+  - efibootmgr
+  - jq
+
 
 
 # Time synchronization

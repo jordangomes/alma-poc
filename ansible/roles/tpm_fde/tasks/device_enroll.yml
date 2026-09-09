@@ -1,0 +1,82 @@
+---
+# Sub-task: Enroll TPM 2.0 and Recovery Key on a single LUKS device
+
+- name: Set token detection facts for {{ dump_item.item }}
+  ansible.builtin.set_fact:
+    has_tpm2_token: "{{ 'systemd-tpm2' in dump_item.stdout }}"
+    has_recovery_key: "{{ 'systemd-recovery' in dump_item.stdout }}"
+
+- name: Get LUKS device UUID for {{ dump_item.item }}
+  ansible.builtin.command:
+    cmd: "cryptsetup luksUUID {{ dump_item.item }}"
+  register: luks_uuid_cmd
+  changed_when: false
+
+- name: Output current keyslot status for {{ dump_item.item }}
+  ansible.builtin.debug:
+    msg:
+      - "Device: {{ dump_item.item }} (UUID: {{ luks_uuid_cmd.stdout }})"
+      - "systemd-tpm2 token present: {{ has_tpm2_token }}"
+      - "systemd-recovery key present: {{ has_recovery_key }}"
+
+- name: Enroll TPM 2.0 token on {{ dump_item.item }} (PCRs {{ tpm_fde_pcrs }})
+  ansible.builtin.command:
+    cmd: "systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs={{ tpm_fde_pcrs }} {{ dump_item.item }}"
+  environment:
+    PASSWORD: "{{ tpm_fde_default_passphrase }}"
+  when:
+    - tpm2_available | bool
+    - not has_tpm2_token
+  register: tpm_enroll_result
+  changed_when: true
+
+- name: Generate and enroll unique BitLocker-style recovery key on {{ dump_item.item }}
+  ansible.builtin.command:
+    cmd: "systemd-cryptenroll --recovery-key {{ dump_item.item }}"
+  environment:
+    PASSWORD: "{{ tpm_fde_default_passphrase }}"
+  when:
+    - tpm_fde_generate_recovery_key | bool
+    - not has_recovery_key
+  register: recovery_enroll_result
+  changed_when: true
+
+- name: Extract generated recovery key string
+  ansible.builtin.set_fact:
+    extracted_recovery_key: >-
+      {{
+        (recovery_enroll_result.stdout | default('') ~ recovery_enroll_result.stderr | default(''))
+        | regex_findall('[a-z0-9]{6}-[a-z0-9]{6}-[a-z0-9]{6}-[a-z0-9]{6}-[a-z0-9]{6}-[a-z0-9]{6}-[a-z0-9]{6}-[a-z0-9]{6}')
+        | first | default('', true)
+      }}
+  when:
+    - recovery_enroll_result is defined
+    - recovery_enroll_result is changed
+
+- name: Escrow recovery key to local secure file ({{ tpm_fde_escrow_local_path }})
+  ansible.builtin.copy:
+    dest: "{{ tpm_fde_escrow_local_path }}"
+    content: |
+      ================================================================================
+       AlmaLinux 10 Workstation - BitLocker-Style LUKS2 Recovery Key
+      ================================================================================
+       Hostname:        {{ ansible_hostname | default('localhost') }}
+       System UUID:     {{ ansible_product_uuid | default('N/A') }}
+       LUKS Device:     {{ dump_item.item }}
+       LUKS UUID:       {{ luks_uuid_cmd.stdout }}
+       Key Type:        systemd-recovery (Base32 / 128-bit)
+       Enrolled Date:   {{ ansible_date_time.iso8601 | default('N/A') }}
+      --------------------------------------------------------------------------------
+       Recovery Password:
+       {{ extracted_recovery_key }}
+      --------------------------------------------------------------------------------
+       Keep this key secure. It is required to unlock the disk if firmware, UEFI
+       Secure Boot certificates, or hardware measurements (PCR 7) mismatch at boot.
+      ================================================================================
+    owner: root
+    group: root
+    mode: '0400'
+  when:
+    - tpm_fde_escrow_backend == "local"
+    - extracted_recovery_key is defined
+    - extracted_recovery_key | length > 0

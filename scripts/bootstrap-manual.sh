@@ -19,8 +19,9 @@ echo "=== [Manual Bootstrap] Starting AlmaLinux 10 ansible-pull bootstrap ==="
 echo "Repository: $GIT_REPO"
 echo "Branch:     $GIT_BRANCH"
 
-echo "1. Installing prerequisite packages (git, ansible-core, epel-release, python3)..."
-dnf install -y git ansible-core epel-release python3 python3-pip authselect chrony audit aide
+echo "1. Installing prerequisite packages (git, ansible-core, epel-release, python3, ansible collections)..."
+dnf install -y epel-release
+dnf install -y git ansible-core ansible-collection-ansible-posix ansible-collection-community-general python3 python3-pip authselect chrony audit aide
 
 mkdir -p /etc/ansible
 cat <<'EOF' > /etc/ansible/ansible.cfg
@@ -35,13 +36,18 @@ collections_path = /var/lib/ansible/local/ansible/collections:/usr/share/ansible
 EOF
 
 echo "2. Setting up local repository at $LOCAL_ANSIBLE_DIR..."
-mkdir -p "$LOCAL_ANSIBLE_DIR"
+git config --system --add safe.directory "$LOCAL_ANSIBLE_DIR" || true
 
 if [ -d "$LOCAL_ANSIBLE_DIR/.git" ]; then
     echo "Existing git repository found. Pulling latest changes..."
-    git -C "$LOCAL_ANSIBLE_DIR" pull --rebase
+    git -C "$LOCAL_ANSIBLE_DIR" pull --rebase || {
+        echo "Pull failed, fetching and resetting to origin/$GIT_BRANCH..."
+        git -C "$LOCAL_ANSIBLE_DIR" fetch origin "$GIT_BRANCH" || true
+        git -C "$LOCAL_ANSIBLE_DIR" reset --hard "origin/$GIT_BRANCH" || true
+    }
 else
     echo "Cloning repository..."
+    rm -rf "$LOCAL_ANSIBLE_DIR"
     git clone -b "$GIT_BRANCH" "$GIT_REPO" "$LOCAL_ANSIBLE_DIR"
 fi
 

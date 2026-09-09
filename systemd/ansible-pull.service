@@ -8,9 +8,13 @@ Wants=network-online.target
 Type=oneshot
 Environment="LC_ALL=C.UTF-8"
 Environment="LANG=C.UTF-8"
-WorkingDirectory=/var/lib/ansible/local
+ExecStartPre=/usr/bin/git config --system --add safe.directory /var/lib/ansible/local
+ExecStartPre=/bin/bash -c 'if [ -d "/var/lib/ansible/local" ] && [ ! -d "/var/lib/ansible/local/.git" ]; then rm -rf /var/lib/ansible/local; fi'
+ExecStartPre=/bin/bash -c 'if [ -f "/var/lib/ansible/local/ansible/requirements.yml" ]; then ansible-galaxy collection install -r "/var/lib/ansible/local/ansible/requirements.yml" -p /usr/share/ansible/collections || true; else ansible-galaxy collection install ansible.posix community.general -p /usr/share/ansible/collections || true; fi'
 ExecStart=/usr/bin/ansible-pull \
-    -U https://github.com/example-org/alma-poc.git \
+    --clean \
+    --accept-host-key \
+    -U https://github.com/jordangomes/alma-poc.git \
     -C main \
     -d /var/lib/ansible/local \
     -i ansible/inventory/hosts.yml \
@@ -18,6 +22,8 @@ ExecStart=/usr/bin/ansible-pull \
 StandardOutput=journal+console
 StandardError=journal+console
 SuccessExitStatus=0 2
+Restart=on-failure
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target

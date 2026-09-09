@@ -1,0 +1,34 @@
+---
+# TPM 2.0 & LUKS2 Full Disk Encryption Automation Variables
+
+# Enable TPM2 and LUKS FDE management
+tpm_fde_enabled: true
+
+# Platform Configuration Registers (PCRs) to bind TPM2 key:
+# PCR 7: Secure Boot state and certificates (standard systemd-cryptenroll default)
+# Note: PCR 2 is intentionally excluded to avoid mismatches between installer ISO boot & disk boot.
+tpm_fde_pcrs: "7"
+
+# Options for /etc/crypttab
+tpm_fde_crypttab_options: "tpm2-device=auto,discard"
+
+# Whether to automatically regenerate dracut initramfs when modules change
+tpm_fde_dracut_regenerate: true
+
+# Default initial passphrase used during Kickstart provisioning
+tpm_fde_default_passphrase: "AlmaLinuxEncryptionKey2026!"
+
+# BitLocker-style recovery key generation and escrow
+tpm_fde_generate_recovery_key: true
+tpm_fde_remove_initial_passphrase: false
+tpm_fde_escrow_backend: "local"  # options: local | ansible_controller | webhook | custom_script
+tpm_fde_escrow_local_path: "/root/.luks-recovery-key.txt"
+
+# Required packages for TPM 2.0, LUKS, and UEFI management
+tpm_fde_packages:
+  - tpm2-tools
+  - tpm2-tss
+  - cryptsetup
+  - mokutil
+  - efibootmgr
+  - jq

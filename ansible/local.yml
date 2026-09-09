@@ -25,6 +25,9 @@
 
 
   roles:
+    - role: tpm_fde
+      tags: [security, tpm, fde, luks, uefi, escrow]
+
     - role: bootstrap_pull
       tags: [bootstrap, pull, systemd]
 
@@ -33,6 +36,7 @@
 
     - role: workstation_baseline
       tags: [workstation, customization]
+
 
   post_tasks:
     - name: Output deployment summary
